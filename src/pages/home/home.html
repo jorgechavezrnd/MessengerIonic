@@ -4,15 +4,48 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>Home</ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only color="royal" (click)="sendRequest()">
+        <img src="../../assets/img/logo_live_add.png" class="icon-in-button">
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  <h3>Ionic Menu Starter</h3>
+<ion-content padding class="backgroundPlatzinger">
+  <ion-grid id="homeMeContainer">
+    <ion-row>
+      <ion-col col-3>
+        <div class="avatarFrameonline">
+          <img src="../../assets/img/generic_avatar.png" class="avatarImg img-fluid">
+        </div>
+      </ion-col>
+      <ion-col col-9 padding>
+        Nick <br />
+        <small>Subnick</small> <br />
+        <small><b>eduardo@platzi.com</b></small>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will show you the way.
-  </p>
+  <div class="searchBoxContainer">
+    <ion-input type="search" id="searchField" placeholder="Busca entre tus amigos" [(ngModel)]="query"></ion-input>
+  </div>
 
-  <button ion-button secondary menuToggle>Toggle Menu</button>
+  <div *ngIf="user && user.friends">
+    <div>
+      <div>
+        <b>Amigos ({{user.friends.length}}/{{user.friends.length}})</b>
+      </div>
+      <!--<div class="contact-list-item" *ngFor="let user of users | search: query" (click)="goToConversation(user)">
+          <img src="../../assets/img/{{getIconByStatus(user.status)}}" class="status">
+          <b>{{user.nick}}</b> <i class="msnicon brb"></i>
+          <small *ngIf="user.status">{{user.status}}</small>
+        </div>
+      </div>-->
+      <div *ngFor="let user of user.friends">
+        <friend [uid]="user"></friend>
+      </div>
+    </div>
+  </div>
 </ion-content>

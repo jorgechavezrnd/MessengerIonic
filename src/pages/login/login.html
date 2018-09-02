@@ -1,0 +1,67 @@
+<!--
+  Generated template for the LoginPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Login</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding class="backgroundPlatzinger bposy0">
+  <div id="avatarLogin">
+    <ion-row>
+      <ion-col col-6 offset-3>
+        <div class="avatarFrameoffline">
+          <img src="assets/img/generic_avatar.png" class="avatarImg img-fluid">
+        </div>
+      </ion-col>
+    </ion-row>
+  </div>
+  <ion-list>
+    <ion-item *ngIf="operation === 'register'">
+      <ion-label fixed>Nick</ion-label>
+      <ion-input type="text" [(ngModel)]="nick"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label fixed>Email</ion-label>
+      <ion-input type="email" [(ngModel)]="email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label fixed>Password</ion-label>
+      <ion-input type="password" [(ngModel)]="password"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="operation === 'register'">
+      <ion-label fixed>Repetir</ion-label>
+      <ion-input type="password" [(ngModel)]="password2"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label fixed>Status</ion-label>
+      <ion-select [(ngModel)]="status">
+        <ion-option value="Online">Conectado</ion-option>
+        <ion-option value="Away">Ausente</ion-option>
+        <ion-option value="Busy">Ocupado</ion-option>
+        <ion-option value="AppearOffline">Desconectado</ion-option>
+        <ion-option value="Offline">Desconectado2</ion-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label fixed>Recordarme</ion-label>
+      <ion-checkbox></ion-checkbox>
+    </ion-item>
+  </ion-list>
+  <div padding>
+    <span *ngIf="operation === 'register'">Ya tienes cuenta? <a (click)="operation = 'login'"><b>Click aqui</b></a></span>
+    <span *ngIf="operation === 'login'">Aun no tienes cuenta? <a (click)="operation = 'register'"><b>Click aqui</b></a></span>
+    <hr />
+    <button *ngIf="operation === 'login'" ion-button (click)="loginWithEmail()" block>Ingresar</button>
+    <button *ngIf="operation === 'register'" ion-button (click)="registerWithEmail()" block>Registrarse</button>
+    <hr />
+    <button ion-button (click)="facebookAuth()" block>Ingresa con Facebook</button>
+  </div>
+</ion-content>

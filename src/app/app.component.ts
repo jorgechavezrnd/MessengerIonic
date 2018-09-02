@@ -1,10 +1,15 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, Platform } from 'ionic-angular';
+import { Nav, Platform, App, AlertController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { HomePage } from '../pages/home/home';
-import { ListPage } from '../pages/list/list';
+import { LoginPage } from '../pages/login/login';
+import { ProfilePage } from '../pages/profile/profile';
+import { AuthService } from '../services/auth.service'
+import { UserService } from '../services/user.service';
+import { RequestService } from '../services/request.service';
+import { User } from '../interfaces/user';
 
 @Component({
   templateUrl: 'app.html'
@@ -12,19 +17,39 @@ import { ListPage } from '../pages/list/list';
 export class MyApp {
   @ViewChild(Nav) nav: Nav;
 
-  rootPage: any = HomePage;
+  rootPage: any = LoginPage;
 
   pages: Array<{title: string, component: any}>;
+  user: User;
+  requests: any;
+  mailsShown: any = [];
 
-  constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
+  constructor(private app: App, public platform: Platform, public statusBar: StatusBar, 
+              public splashScreen: SplashScreen, private userService: UserService, 
+              private authService: AuthService, private requestService: RequestService,
+              private alertController: AlertController) {
     this.initializeApp();
 
     // used for an example of ngFor and navigation
     this.pages = [
       { title: 'Home', component: HomePage },
-      { title: 'List', component: ListPage }
+      { title: 'Profile', component: ProfilePage }
     ];
-
+    
+    this.authService.getStatus().subscribe((session) => {
+      if (!session) {
+        return;
+      }
+      if (!session.uid) {
+        return;
+      }
+      this.userService.getById(session.uid).valueChanges().subscribe((user: User) => {
+        this.user = user;
+        this.getFriendRequest();
+      }, (error) => {
+        console.log(error);
+      })
+    });
   }
 
   initializeApp() {
@@ -40,5 +65,67 @@ export class MyApp {
     // Reset the content nav to have just this page
     // we wouldn't want the back button to show in this scenario
     this.nav.setRoot(page.component);
+  }
+
+  getFriendRequest() {
+    this.requestService.getRequestsForEmail(this.user.email).valueChanges().subscribe((requests: any) => {
+      console.log(requests);
+      this.requests = requests;
+      this.requests = this.requests.filter((r) => {
+        return r.status !== 'accepted' && r.status !== 'rejected';
+      });
+      this.requests.forEach((r) => {
+        if (this.mailsShown.indexOf(r.sender.email) === -1) {
+          this.mailsShown.push(r.sender.email);
+          this.showRadio(r);
+        }
+      });
+    }, (error) => {
+      console.log(error);
+    })
+  }
+
+  showRadio(r) {
+    let alert = this.alertController.create();
+    alert.setTitle('Solicitud de Amistad');
+    alert.setMessage(r.sender.nick + ' te ha enviado una solicitud, deseas aceptar?');
+    alert.addInput({
+      type: 'radio',
+      label: 'Claro',
+      value: 'yes',
+      checked: true
+    });
+    alert.addInput({
+      type: 'radio',
+      label: 'No',
+      value: 'no'
+    });
+    alert.addButton({
+      text: 'OK',
+      handler: data => {
+        if (data === 'yes') {
+          this.requestService.setRequestStatus(r, 'accepted').then((data) => {
+            this.userService.addFriend(this.user.uid, r.sender.uid);
+          }).catch((error) => {
+            console.log(error);
+          });
+        } else {
+          this.requestService.setRequestStatus(r, 'accepted').then((data) => {
+            console.log('Solicitud Rechazada');
+          }).catch((error) => {
+            console.log(error);
+          });
+        }
+      }
+    });
+    alert.present();
+  }
+
+  logout() {
+    this.authService.logout().then(() => {
+      this.app.getRootNav().setRoot(LoginPage);
+    }).catch((error) => {
+      console.log(error);
+    });
   }
 }
